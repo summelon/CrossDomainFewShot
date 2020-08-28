@@ -56,7 +56,7 @@ def train(base_datamgr, base_set, aux_iter, val_loader, model, start_epoch, stop
 if __name__=='__main__':
 
   # set numpy random seed
-  np.random.seed(10)
+  # np.random.seed(10)
 
   # parse argument
   params = parse_args('train')
