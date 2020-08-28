@@ -4,7 +4,16 @@ import glob
 import torch
 import argparse
 
+
+def fix_seed():
+      torch.manual_seed(666)
+      torch.backends.cudnn.deterministic = True
+      torch.backends.cudnn.benchmark = False
+      np.random.seed(666)
+
+
 def parse_args(script):
+  fix_seed()
   parser = argparse.ArgumentParser(description= 'few-shot script %s' %(script))
   parser.add_argument('--dataset', default='multi', help='miniImagenet/cub/cars/places/plantae, specify multi for training with multiple domains')
   parser.add_argument('--testset', default='cub', help='cub/cars/places/plantae, valid only when dataset=multi')
@@ -16,7 +25,7 @@ def parse_args(script):
   parser.add_argument('--train_aug'   , action='store_true',  help='perform data augmentation or not during training ')
   parser.add_argument('--name'        , default='tmp', type=str, help='')
   parser.add_argument('--save_dir'    , default='./output', type=str, help='')
-  parser.add_argument('--data_dir'    , default='./filelists', type=str, help='')
+  parser.add_argument('--data_dir'    , default='/home/data/few_shot', type=str, help='')
 
   if script == 'train':
     parser.add_argument('--num_classes' , default=200, type=int, help='total number of classes in softmax, only used in baseline')
