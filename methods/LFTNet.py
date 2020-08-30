@@ -16,6 +16,7 @@ class LFTNet(nn.Module):
 
     # tf writer
     self.tf_writer = SummaryWriter(log_dir=tf_path) if tf_path is not None else None
+    self.bn_only = params.bn_only
 
     # get metric-based model and enable L2L(maml) training
     train_few_shot_params    = dict(n_way=params.train_n_way, n_support=params.n_shot)
@@ -69,14 +70,28 @@ class LFTNet(nn.Module):
 
   # split the parameters of feature-wise transforamtion layers and others
   def split_model_parameters(self):
-    model_params = []
     ft_params = []
-    for n, p in self.model.named_parameters():
-      n = n.split('.')
-      if n[-1] == 'gamma' or n[-1] == 'beta':
-        ft_params.append(p)
+    model_bn_params = []
+    model_wo_bn_params = []
+    for n, m in list(self.model.named_modules()):
+      if len(list(m.named_modules())) > 1:
+        continue
+      if m.__class__.__name__ in ['FeatureWiseTransformation2d_fw',
+                                  'BatchNorm2d_fw', 'BatchNorm2d']:
+        for n, p in m.named_parameters():
+          if n in ['gamma', 'beta']:
+            ft_params.append(p)
+          else:
+            model_bn_params.append(p)
       else:
-        model_params.append(p)
+        for n, p in m.named_parameters():
+          model_wo_bn_params.append(p)
+
+    if self.bn_only:
+      model_params = model_bn_params
+    else:
+      model_params = model_bn_params + model_wo_bn_params
+
     return model_params, ft_params
 
   def forward_aux_loss(self, x, y):
