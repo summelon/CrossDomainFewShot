@@ -146,7 +146,6 @@ if __name__ == '__main__':
     raise ValueError('Unknown method')
   model = model.cuda()
   model.eval()
-
   # load model
   checkpoint_dir = '%s/checkpoints/%s'%(params.save_dir, params.name)
   if params.save_epoch != -1:
@@ -167,7 +166,7 @@ if __name__ == '__main__':
       model.load_state_dict(tmp['model_state'], strict=False)
     except:
       raise
-
+  # print(model.temp)
   # load feature file
   print('  load saved feature file')
   cl_data_file = feat_loader.init_loader(featurefile)

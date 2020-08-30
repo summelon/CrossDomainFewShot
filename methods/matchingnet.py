@@ -12,16 +12,16 @@ class MatchingNet(MetaTemplate):
     super(MatchingNet, self).__init__( model_func,  n_way, n_support, tf_path=tf_path)
 
     # loss function
-    self.loss_fn    = nn.NLLLoss()
 
+    #self.loss_fn    = nn.NLLLoss()
+    self.loss_fn    = nn.CrossEntropyLoss()
     # metric
     self.FCE = FullyContextualEmbedding(self.feat_dim)
     self.G_encoder = backbone.LSTM(self.feat_dim, self.feat_dim, 1, batch_first=True, bidirectional=True)
-
     self.relu = nn.ReLU()
     self.softmax = nn.Softmax(dim=1)
     self.method = 'MatchingNet'
-
+    self.temp = nn.Parameter(torch.tensor(10.))
   def encode_training_set(self, S, G_encoder = None):
     if G_encoder is None:
       G_encoder = self.G_encoder
@@ -38,7 +38,8 @@ class MatchingNet(MetaTemplate):
     F = FCE(f, G)
     F_norm = torch.norm(F,p=2, dim =1).unsqueeze(1).expand_as(F)
     F_normalized = F.div(F_norm + 0.00001)
-    scores = self.relu( F_normalized.mm(G_normalized.transpose(0,1))  ) *100 # The original paper use cosine simlarity, but here we scale it by 100 to strengthen highest probability after softmax
+    scores = self.relu(F_normalized.mm(G_normalized.transpose(0,1))) *100 # The original paper use cosine simlarity, but here we scale it by 100 to strengthen highest probability after softmax
+    scores = scores * self.temp
     softmax = self.softmax(scores)
     logprobs =(softmax.mm(Y_S)+1e-6).log()
     return logprobs
