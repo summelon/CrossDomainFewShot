@@ -26,6 +26,8 @@ def parse_args(script):
   parser.add_argument('--name'        , default='tmp', type=str, help='')
   parser.add_argument('--save_dir'    , default='./output', type=str, help='')
   parser.add_argument('--data_dir'    , default='/home/data/few_shot', type=str, help='')
+  parser.add_argument('--use_temp'    , action='store_true', help="Using temp to help classifier or not")
+
 
   if script == 'train':
     parser.add_argument('--num_classes' , default=200, type=int, help='total number of classes in softmax, only used in baseline')

@@ -36,7 +36,7 @@ def train(base_datamgr, base_set, aux_iter, val_loader, model, start_epoch, stop
     model.eval()
     with torch.no_grad():
       acc = model.test_loop(val_loader)
-    #print(f"model.temp is {model.model.temp:}")
+    print(f"model.temp is {model.model.temp:}")
     # save
     if acc > max_acc:
       print("best model! save...")

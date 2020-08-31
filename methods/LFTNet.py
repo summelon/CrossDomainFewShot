@@ -17,7 +17,8 @@ class LFTNet(nn.Module):
     # tf writer
     self.tf_writer = SummaryWriter(log_dir=tf_path) if tf_path is not None else None
     self.bn_only = params.bn_only
-
+    self.matchingnet = False
+    self.use_temp = params.use_temp
     # get metric-based model and enable L2L(maml) training
     train_few_shot_params    = dict(n_way=params.train_n_way, n_support=params.n_shot)
     backbone.FeatureWiseTransformation2d_fw.feature_augment = True
@@ -28,7 +29,8 @@ class LFTNet(nn.Module):
       model = protonet.ProtoNet( model_dict[params.model], tf_path=params.tf_dir, **train_few_shot_params)
     elif params.method == 'matchingnet':
       backbone.LSTMCell.maml = True
-      model = matchingnet.MatchingNet( model_dict[params.model], tf_path=params.tf_dir, **train_few_shot_params)
+      model = matchingnet.MatchingNet( model_dict[params.model], tf_path=params.tf_dir, use_temp=params.use_temp,**train_few_shot_params)
+      self.matchingnet = True
     elif params.method in ['relationnet', 'relationnet_softmax']:
       relationnet.RelationConvBlock.maml = True
       relationnet.RelationModule.maml = True
@@ -91,7 +93,8 @@ class LFTNet(nn.Module):
       model_params = model_bn_params
     else:
       model_params = model_bn_params + model_wo_bn_params
-
+    if self.matchingnet and self.use_temp: 
+        model_params.append(self.model.temp)
     return model_params, ft_params
 
   def forward_aux_loss(self, x, y):
