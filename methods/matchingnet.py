@@ -13,8 +13,8 @@ class MatchingNet(MetaTemplate):
 
     # loss function
 
-    #self.loss_fn    = nn.NLLLoss()
-    self.loss_fn    = nn.CrossEntropyLoss()
+    self.loss_fn    = nn.NLLLoss()
+    #self.loss_fn    = nn.CrossEntropyLoss()
     # metric
     self.FCE = FullyContextualEmbedding(self.feat_dim)
     self.G_encoder = backbone.LSTM(self.feat_dim, self.feat_dim, 1, batch_first=True, bidirectional=True)
